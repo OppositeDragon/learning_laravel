@@ -247,3 +247,47 @@ Edit the .env file to add the database credentials.
 | ![](imgs/store-post.png) |
 
 
+## Dynamic URLs (single-post)
+1. To create a dynamic url, the route must be created with a parameter. Thi
+	```php
+	 Route::get('/post/{post}', [BlogController::class, "viewPost"]);
+	```
+1. The viewPost() method need to be created on the BlogController. The parameter passed to the method must match the parameter on the route, and a type must be also provided for the parameter, in this way Laravel can do argument hinting and automatically retrieve the post from the database.
+   ```php
+   public function viewPost(Post $post) {
+		return view("single-post", ['post' => $post]);
+	}
+   ```
+1. On the view, the post can be accessed with the variable passed to the view.
+   ```php
+    <h2>{{ $post->title }}</h2>
+   ```
+1. To retrieve models linked with a foreign key, a method can be created on the Post model.
+   ```php
+   public function userFromPost(){
+		 return $this->belongsTo(User::class, 'user_id');
+	 }
+   ```
+1. It can be used in the view, through the post variable passed to the view.
+   ```php
+   Posted by <a href="#">{{ $post->userFromPost->username }}</a>
+   ```
+	
+1. After the post creation, a redirection can be issued, to send the user to the newly created post.
+   ```php
+   $newPost =	Post::create($postFields);
+   return redirect("/post/{$newPost->id}")->
+	  with('success', "New post created successfully");
+   ```
+	![](imgs/post-created-redirection.png)
+
+## Markdown support
+1. Override the body content on the post, importing Str, and using the built-in markdown() method.
+   ```php
+   $post['body'] = Str::markdown($post->body);
+   ```
+1. On the view, it es needed to allow html tags. 
+   ```php
+    <p>{!! $post->body !!}</p>
+   ```
+![](imgs/markdown.png)
