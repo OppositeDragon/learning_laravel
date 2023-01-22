@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\FollowController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,3 +37,8 @@ Route::post('/create-post', [BlogController::class, "storePost"])->middleware('a
 Route::delete('/post/{post}', [BlogController::class, "deletePost"])->middleware('can:delete,post');
 Route::get('/post/{post}/edit', [BlogController::class, "editPostForm"])->middleware('can:update,post');
 Route::put('/post/{post}', [BlogController::class, "updatePost"])->middleware('can:update,post');
+
+
+//Follow user routes
+Route::post('/follow/{user}',[FollowController::class, "assignFollower"])->middleware('auth');
+Route::delete('/follow/{user}',[FollowController::class, "unassignFollower"])->middleware('auth');

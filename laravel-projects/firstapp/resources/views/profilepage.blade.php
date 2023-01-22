@@ -1,9 +1,10 @@
 <x-layout>
 	<div class="container py-md-5 container--narrow">
 		<h2>
-			<img class="avatar-small" src="{{auth()->user()->avatar}}" />
+			<img class="avatar-small" src="{{ $user->avatar }}" />
 			{{ $user->username }}
-			<form class="ml-2 d-inline" action="#" method="POST">
+			<form class="ml-2 d-inline" action="/follow/{{$user->id}}" method="POST">
+				@csrf
 				<button class="btn btn-primary btn-sm">Follow <i class="fas fa-user-plus"></i></button>
 				<!-- <button class="btn btn-danger btn-sm">Stop Following <i class="fas fa-user-times"></i></button> -->
 				@if (auth()->user()->username == $user->username)
@@ -21,7 +22,7 @@
 		<div class="list-group">
 			@foreach ($posts as $post)
 				<a class="list-group-item list-group-item-action" href="/post/{{ $post->id }}">
-					<img class="avatar-tiny" src="{{ auth()->user()->avatar }}" />
+					<img class="avatar-tiny" src="{{  $user->avatar }}" />
 					<strong>{{ $post->title }}</strong> on {{ $post->created_at->format('F j, Y') }}
 				</a>
 			@endforeach

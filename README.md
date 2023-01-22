@@ -430,3 +430,30 @@ Gates are a way to check if a user has a specific permission. They are not linke
    }
    ```
 ![](imgs/avatar-updated.png)
+
+## Follow another user functionality.
+1. Create migration to add follows table. `php artisan make:migration create_follows_table`
+1. The up() method would look like this:
+   ```php
+	public function up() {
+		Schema::create('follows', function (Blueprint $table) {
+			$table->id();
+			$table->foreignId('user_id')->constrained();
+			//create column, then sets it as foreign key of the user table on thi id column.
+			$table->unsignedBigInteger('followeduser');
+			$table->foreign('followeduser')->references('id')->on('users');
+			
+			$table->timestamps();
+		});
+	}
+	```
+1. run: `php artisan migrate`, which creates the table.
+![](imgs/follows-table.png)
+1. Create a controller to handle the follow functionality. `php artisan make:controller FollowController`
+1. Create a Follow model, to handle the database interaction. `php artisan make:model Follow` 
+1. On the controller create the methods for assigning and unassigning followers. When creatien the follow, enforcing rules may be desired, such as user can not follew self, and cant follow someone that one is already following.
+   ![](imgs/followed-user.png)
+   ---
+   ![](imgs/follow-row.png)
+   ---
+   ![](imgs/already-followed.png)

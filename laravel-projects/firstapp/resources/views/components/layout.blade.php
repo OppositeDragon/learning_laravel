@@ -29,7 +29,7 @@
 					<span class="text-white mr-2 header-chat-icon" data-toggle="tooltip" data-placement="bottom" title="Chat"><i
 							class="fas fa-comment"></i></span>
 					<a class="mr-2" href="/profile/{{ auth()->user()->username }}"><img data-toggle="tooltip" data-placement="bottom"
-							src="{{auth()->user()->avatar}}" title="My Profile"
+							src="{{ auth()->user()->avatar }}" title="My Profile"
 							style="width: 32px; height: 32px; border-radius: 16px" /></a>
 					<a class="btn btn-sm btn-success mr-2" href="/create-post">Create Post</a>
 					<form class="d-inline" action="/logout" method="POST">
@@ -71,6 +71,13 @@
 		<div class="container container-narrow">
 			<div class="alert alert-danger text-center">
 				{{ session('faillogin') }}
+			</div>
+		</div>
+	@endif
+	@if (session()->has('fail'))
+		<div class="container container-narrow">
+			<div class="alert alert-danger text-center">
+				{{ session('fail') }}
 			</div>
 		</div>
 	@endif
