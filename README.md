@@ -291,3 +291,30 @@ Edit the .env file to add the database credentials.
     <p>{!! $post->body !!}</p>
    ```
 ![](imgs/markdown.png)
+
+## Middleware
+It allows to check the state of the app, to guard routes or other resources from unauthorized access. it is a layer that can modify the request or response, or even block the request.
+1. To create custom middleware, run:`php artisan make:middleware customActionMiddleware`
+2. To use a middleware, it must be registered on the `app/Http/Kernel.php` file.
+3. To apply middleware, on tho routes, it must be called on the route object.
+   ```php
+   Route::post('/login', [UserController::class, "login"])->middleware('guest');
+   Route::post('/logout', [UserController::class, "logout"])->middleware('auth');
+   ```
+## Policies for updating and deleting posts
+The general idea for this is, only the author should be allowed to modify or delete the post, others  should not see or access that functionality.
+
+1. To create a policy, run: `php artisan make:policy PostPolicy --model=Post`, using the model flag, will allow Laravel to create extra boilerplate code, that will "link" the policy with the Post model.
+1. Policies are registered on the `app/Providers/AuthServiceProvider.php` file.
+   ```php
+	 protected $policies = [
+		Post::class => PostPolicy::class,
+        // 'App\Models\Model' => 'App\Policies\ModelPolicy',
+    ];
+	 ```
+1. Policies will have several methods, that need to be modified to return a boolean value, based on on the rule the policy is based on.
+   ```php
+   public function update(User $user, Post $post) {
+		return $user->id === $post->user_id;
+	}
+   ```

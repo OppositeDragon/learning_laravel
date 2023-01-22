@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller {
-	
+
 	public function register(Request $request) {
 		$inputData = $request->validate([
 			'username' => ['required', 'min:3', 'max:20', Rule::unique('users', 'username'),],
@@ -47,5 +47,14 @@ class UserController extends Controller {
 		} else {
 			return view('homepage');
 		}
+	}
+	public function profile(User $user) {
+		return view(
+			'profilepage',
+			[
+				'user' => $user,
+				'posts' => $user->postsOfUser()->latest() ->get(),
+			]
+		);
 	}
 }

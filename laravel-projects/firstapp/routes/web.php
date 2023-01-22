@@ -16,12 +16,16 @@ use App\Http\Controllers\UserController;
 */
 
 //User Routes
-Route::get('/', [UserController::class, "showHomePage"]);
-Route::post('/register', [UserController::class, "register"]);
-Route::post('/login', [UserController::class, "login"]);
-Route::post('/logout', [UserController::class, "logout"]);
+Route::get('/', [UserController::class, "showHomePage"])->name('login');
+Route::post('/register', [UserController::class, "register"])->middleware('guest');
+Route::post('/login', [UserController::class, "login"])->middleware('guest');
+Route::post('/logout', [UserController::class, "logout"])->middleware('auth');
+
+//Profile routes
+Route::get('/profile/{user:username}', [UserController::class, "profile"]);
 
 //Blog post routes
-Route::get('/create-post', [BlogController::class, "createPost"]);
+Route::get('/create-post', [BlogController::class, "createPost"])->middleware('auth');
 Route::get('/post/{post}', [BlogController::class, "viewPost"]);
-Route::post('/create-post', [BlogController::class, "storePost"]);
+Route::post('/create-post', [BlogController::class, "storePost"])->middleware('auth');
+
