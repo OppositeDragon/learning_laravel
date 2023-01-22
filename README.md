@@ -318,3 +318,49 @@ The general idea for this is, only the author should be allowed to modify or del
 		return $user->id === $post->user_id;
 	}
    ```
+1. Middleware can also be used to enforce a policy. For example to onle allow deletion of posts by their respectivo authors.
+   ```php
+	Route::delete('/post/{post}', [BlogController::class, "deletePost"])->middleware('can:delete,post');
+   ```
+1. To use the policy on the view, the `@can` directive may be used.
+	```php
+	@can('update', $post)
+		<a href="/delete" method="POST">Delete post</a>
+	@endcan
+   ```
+
+## Allow "Moderation"
+- To modify an already existing table, using migration, run: `php artisan make:migration add_isadmin_users_table --table=users`
+- Then on the `up()` method, instruct artisan to create the column
+  ```php
+  $table->boolean('isAdmin')->default(false);
+  ```
+  The `down()` method can contain the code to reverse what is on the `up()` method.
+  ```php
+  $table->dropColumn('isAdmin');
+  ```
+- Run `php artisan migrate` to apply the changes to the database.
+![](imgs/isadmin-migration.png)
+
+- Modify post policy to take into account the isAdmin status. this con be set up for both, the update() and delete() methods.
+  ```php
+  public function update(User $user, Post $post) {
+		return $user->id === $post->user_id || $user->isAdmin;
+	}
+  ```
+
+## Gates (Admins only)
+Gates are a way to check if a user has a specific permission. They are not linked to a model, and can be used to check if a user has a specific permission, or if a user is an admin.
+1. To define a policy, on the `app/Providers/AuthServiceProvider` class, the `Gate::define()` method can be used inside the `boot()` method.
+	```php
+	Gate::define('accessAdminPage', function (User $user) {
+		return $user->isAdmin;
+	});
+	```
+1. This can be used on the routes file, to protect the routes that need to be "gated".
+   ```php
+   Route::get(
+     '/admin', [UserController::class, "adminPage"],
+   )->middleware('can:accessAdminPage');
+   ```
+1. On the user controller class, a method to show the route must be created.

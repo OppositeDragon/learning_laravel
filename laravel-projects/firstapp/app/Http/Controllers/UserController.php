@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Gate;
 
 class UserController extends Controller {
 
@@ -30,7 +31,7 @@ class UserController extends Controller {
 			'password' => $inputData['loginpassword'],
 		],)) {
 			$request->session()->regenerate();
-			return redirect('/')->with('success', 'You have been logged in.');
+			return redirect('/')->with('success', 'You have successfully logged in.');
 		} else {
 			return redirect('/')->with('faillogin', 'Invalid login credentials.');
 		}
@@ -53,8 +54,14 @@ class UserController extends Controller {
 			'profilepage',
 			[
 				'user' => $user,
-				'posts' => $user->postsOfUser()->latest() ->get(),
+				'posts' => $user->postsOfUser()->latest()->get(),
 			]
 		);
+	}
+	public function adminPage() {
+		if (Gate::allows('accessAdminPage'))
+			return '<h1>Only admins page</h1>';
+		else
+			return '<h4>Only admins page</h4>';
 	}
 }

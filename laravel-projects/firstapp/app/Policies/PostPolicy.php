@@ -48,7 +48,7 @@ class PostPolicy {
 	 * @return \Illuminate\Auth\Access\Response|bool
 	 */
 	public function update(User $user, Post $post) {
-		return $user->id === $post->user_id;
+		return $user->id === $post->user_id || $user->isAdmin;
 	}
 
 	/**
@@ -59,7 +59,7 @@ class PostPolicy {
 	 * @return \Illuminate\Auth\Access\Response|bool
 	 */
 	public function delete(User $user, Post $post) {
-		return $user->id === $post->user_id;
+		return $user->id === $post->user_id || $user->isAdmin;
 	}
 
 	/**

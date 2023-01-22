@@ -15,6 +15,9 @@ use App\Http\Controllers\UserController;
 |
 */
 
+//Admin-only routes
+Route::get('/admin',	[UserController::class, "adminPage"])->middleware('can:accessAdminPage');
+
 //User Routes
 Route::get('/', [UserController::class, "showHomePage"])->name('login');
 Route::post('/register', [UserController::class, "register"])->middleware('guest');
@@ -28,4 +31,6 @@ Route::get('/profile/{user:username}', [UserController::class, "profile"]);
 Route::get('/create-post', [BlogController::class, "createPost"])->middleware('auth');
 Route::get('/post/{post}', [BlogController::class, "viewPost"]);
 Route::post('/create-post', [BlogController::class, "storePost"])->middleware('auth');
-
+Route::delete('/post/{post}', [BlogController::class, "deletePost"])->middleware('can:delete,post');
+Route::get('/post/{post}/edit', [BlogController::class, "editPostForm"])->middleware('can:update,post');
+Route::put('/post/{post}', [BlogController::class, "updatePost"])->middleware('can:update,post');

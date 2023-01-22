@@ -28,4 +28,18 @@ class BlogController extends Controller {
 		$post['body'] = Str::markdown($post->body);
 		return view("single-post", ['post' => $post]);
 	}
+	public function editPostForm(Post $post) {
+		return view('edit-post',['post'=>$post]);
+	}
+
+	public function updatePost(Post $post, Request $request) {
+		$fields = $request->validate([
+			'title' => 'required',
+			'body' => 'required'
+		]);
+		$fields['title'] = strip_tags($fields['title']);
+		$fields['body'] = strip_tags($fields['body']);
+		$post->update($fields);
+return back()->with('success', "Post updated successfully");
+	}
 }
