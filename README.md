@@ -364,3 +364,30 @@ Gates are a way to check if a user has a specific permission. They are not linke
    )->middleware('can:accessAdminPage');
    ```
 1. On the user controller class, a method to show the route must be created.
+
+## Uploading images
+1. To allow file uploads, the `enctype="multipart/form-data"` attribute must be added to the form.
+	```php
+	<form action="/post" method="POST" enctype="multipart/form-data">
+	```
+	![](imgs/upload-file.png)
+1. To allow the upload of files bigger than 2MB, it is neccesary to edit the php.ini file, and change the `upload_max_filesize` value.
+1. Create a post route to upload the file, and a function on the controller, to configure the upload.
+   ```php
+	public function storeAvatar(Request $request){
+		//file tag name, is the name used to retrieve that specific file. <input  name="avatar"...
+		$request->file('avatar')->store('avatars');
+	}
+   ```
+	![](imgs/file-storage.png)
+	> The name of the file is automatically changed by Laravel
+1. To link the actual public folder of the project, with the folder Laravel stores the file, run: `php artisan storage:link`. If this is done, the avatars directory will be available directly on the browser through a linx to the files. For Laravel to save on this directory, the parameter to the sore method must change to the public directory.
+	```php
+	$request->file('avatar')->store('public/avatars');
+	```
+	![](imgs/storage-link.png)
+	---
+	![](imgs/file-direct-access.png)
+
+
+   

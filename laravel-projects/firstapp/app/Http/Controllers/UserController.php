@@ -64,4 +64,11 @@ class UserController extends Controller {
 		else
 			return '<h4>Only admins page</h4>';
 	}
+	public function manageAvatarForm(){
+		return view('manage-avatar-form');
+	}
+	public function storeAvatar(Request $request){
+		//file tag name, is the name used to retrieve that specific file. <input  name="avatar"...
+		$request->file('avatar')->store('public/avatars');
+	}
 }

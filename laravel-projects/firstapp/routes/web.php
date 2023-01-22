@@ -23,6 +23,8 @@ Route::get('/', [UserController::class, "showHomePage"])->name('login');
 Route::post('/register', [UserController::class, "register"])->middleware('guest');
 Route::post('/login', [UserController::class, "login"])->middleware('guest');
 Route::post('/logout', [UserController::class, "logout"])->middleware('auth');
+Route::get('/manage-avatar', [UserController::class, "manageAvatarForm"])->middleware('auth');
+Route::post('/manage-avatar', [UserController::class, "storeAvatar"])->middleware('auth');
 
 //Profile routes
 Route::get('/profile/{user:username}', [UserController::class, "profile"]);
