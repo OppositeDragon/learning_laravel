@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\BlogController;
 use App\Http\Controllers\UserController;
 
 /*
@@ -14,10 +15,12 @@ use App\Http\Controllers\UserController;
 |
 */
 
+//User Routes
 Route::get('/', [UserController::class, "showHomePage"]);
-
 Route::post('/register', [UserController::class, "register"]);
-
 Route::post('/login', [UserController::class, "login"]);
-
 Route::post('/logout', [UserController::class, "logout"]);
+
+//Blog post routes
+Route::get('/create-post', [BlogController::class, "createPost"]);
+Route::post('/create-post', [BlogController::class, "storePost"]);

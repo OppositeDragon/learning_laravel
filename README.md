@@ -178,6 +178,7 @@ Edit the .env file to add the database credentials.
 		}
 	}
 	```
+![](imgs/logged-in.png)
 
 ### Logout
 1. A logout route needs to be created.
@@ -192,6 +193,8 @@ Edit the .env file to add the database credentials.
 		return redirect('/')->with('success', 'You have been logged out.');
 	}
 	```
+   ![](imgs/logged-out.png)
+
 1. When calling with() on the redirect method, the message can be accessed on the view.
 	```php
 	 @if (session('success'))
@@ -200,4 +203,47 @@ Edit the .env file to add the database credentials.
 		</div>
 	 @endif
 	```
+![](imgs/invalid-login.png)
+
+## Posts
+### Create a migration file for posts.
+1. run `php artisan make:migration create_posts_table`
+
+1. Modify the migration file to add the columns.
+   ```php
+	public function up()
+		{
+			Schema::create('posts', function (Blueprint $table) {
+					$table->id();
+					$table->timestamps();
+					$table->string('title');
+					$table->longText('body');
+					$table->foreignId('user_id')->constrained();
+			});
+		}
+   ```
+1. run `php artisan migrate` to actually create the table on the database.
+
+### Create a model for posts.
+1. Run `php artisan make:model Post`
+1. On the Post model class, under `use HasFactory`, add: `protected $fillable = ['title', 'body', 'user_id'];`, so that it can recognize the data on the array that will be passed to the create() method.
+
+### Create a controller for posts.
+1. On the BolgController, add a method to create a post. The user_id can be extracted from the auth() object.
+	```php
+	public function storePost(Request $request) {
+		$postFields = $request->validate([
+			'title' => 'required',
+			'body' => 'required'
+		]);
+		$postFields['title'] = strip_tags($postFields['title']);
+		$postFields['body'] = strip_tags($postFields['body']);
+		$postFields['user_id'] = auth()->id();
+		Post::create($postFields);
+	}
+   ```
+| ![](imgs/view-post.png)  |
+| :----------------------: |
+| ![](imgs/store-post.png) |
+
 
