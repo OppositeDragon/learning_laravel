@@ -372,9 +372,12 @@ Gates are a way to check if a user has a specific permission. They are not linke
 	```
 	![](imgs/upload-file.png)
 1. To allow the upload of files bigger than 2MB, it is neccesary to edit the php.ini file, and change the `upload_max_filesize` value.
-1. Create a post route to upload the file, and a function on the controller, to configure the upload.
+1. Create a post route to upload the file, and a function on the controller, to configure the upload. Here the file can be validated, for example make sure is an image, or smaller that a certain size.
    ```php
 	public function storeAvatar(Request $request){
+		$request->validate([
+			'avatar' => ['required|image|max:3000',],
+		]);
 		//file tag name, is the name used to retrieve that specific file. <input  name="avatar"...
 		$request->file('avatar')->store('avatars');
 	}
@@ -389,5 +392,41 @@ Gates are a way to check if a user has a specific permission. They are not linke
 	---
 	![](imgs/file-direct-access.png)
 
+### Resize image on server side.
+1. To resize the image, the `Intervention/image` package can be used. To install it, run: `composer require intervention/image`. Then, to use this package, call make() on the Image class, and pass the file to be resized. The way the file is saved, now will be done with the Storage class, as now a rawImage is being manipulated.
+	```php
+	public function storeAvatar(Request $request) {
+		$request->validate([
+			'avatar' => 'required|image|max:3000',
+		]);
+		$rawImg = Image::make($request->file('avatar'))->fit(256)->encode('jpg');
 
-   
+		$user = auth()->user();
+		$filename = $user->id . '-' . uniqid() . '.jpg';
+
+		Storage::put('public/avatars/'.$filename, $rawImg);
+	}
+	```
+1. **Store the path of file on database**. After saving the file, assign the the filename to the avatar property en the user, and call save() on the user.
+   ```php
+   $user->avatar = $filename;
+   $user->save();
+   ```
+1. in this way the first part of the path would need to be prepended to the path provided to html tags. Like this: `src="/storage/avatars/{{auth()->user()->avatar}}"`
+1. To avoid havind to do this, the path can be prepended on the model of user, this also allows to provide a fallback file, for the users where the avatar property is empty.
+   ```php
+	protected function avatar(): Attribute {
+		return Attribute::make(get: function ($value) {
+			return $value ? '/storage/avatars/' . $value : '/fallback-avatar.jpg';
+		});
+	}
+   ```
+### Delete existing avatar, when uploading a new one.
+1. The value of the old avatar needs to be stored, so that it can be referenced later for deletion.  This needs to be done before the new avatar overrides the previos avatar. `$oldAvatar =$user->avatar;`
+1. After the new avatar has been saved, the old avatar can be deleted.
+   ```php
+   if ($oldAvatar != "/fallback-avatar.jpg") {
+     Storage::delete(str_replace("/storage", "public", $oldAvatar));
+   }
+   ```
+![](imgs/avatar-updated.png)

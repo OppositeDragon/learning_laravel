@@ -6,6 +6,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Facades\Image;
 
 class UserController extends Controller {
 
@@ -64,11 +66,25 @@ class UserController extends Controller {
 		else
 			return '<h4>Only admins page</h4>';
 	}
-	public function manageAvatarForm(){
+	public function manageAvatarForm() {
 		return view('manage-avatar-form');
 	}
-	public function storeAvatar(Request $request){
-		//file tag name, is the name used to retrieve that specific file. <input  name="avatar"...
-		$request->file('avatar')->store('public/avatars');
+	public function storeAvatar(Request $request) {
+		$request->validate([
+			'avatar' => 'required|image|max:3000',
+		]);
+		$rawImg = Image::make($request->file('avatar'))->fit(256)->encode('jpg');
+
+		$user = auth()->user();
+		$filename = $user->id . '-' . uniqid() . '.jpg';
+
+		Storage::put('public/avatars/' . $filename, $rawImg);
+		$oldAvatar = $user->avatar;
+		$user->avatar = $filename;
+		$user->save();
+		if ($oldAvatar != "/fallback-avatar.jpg") {
+			Storage::delete(str_replace("/storage", "public", $oldAvatar));
+		}
+		return redirect("profile/{$user->username}")->with('success', 'Avatar updated.');
 	}
 }
