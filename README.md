@@ -452,8 +452,27 @@ Gates are a way to check if a user has a specific permission. They are not linke
 1. Create a controller to handle the follow functionality. `php artisan make:controller FollowController`
 1. Create a Follow model, to handle the database interaction. `php artisan make:model Follow` 
 1. On the controller create the methods for assigning and unassigning followers. When creatien the follow, enforcing rules may be desired, such as user can not follew self, and cant follow someone that one is already following.
-   ![](imgs/followed-user.png)
+   
+	![](imgs/followed-user.png)
    ---
    ![](imgs/follow-row.png)
    ---
    ![](imgs/already-followed.png)
+
+### Stop following a user
+1. The unassignFolloger() method needs to be implemented.
+   ```php
+	public function unassignFollower(User $user) {
+		Follow::where([['user_id', '=', auth()->user()->id], ['followeduser', '=', $user->id],])->delete();
+		return back()->with('success', 'Unfollowed user');
+	}
+	```
+1. As well as the logic to show a different button.
+   ```php
+   @if (!$isFollowing and auth()->user()->id != $user->id)
+     <!-- code -->
+   @endif
+   ```
+![](imgs/unfollowed-user.png)
+
+## Model relationships in Laravel

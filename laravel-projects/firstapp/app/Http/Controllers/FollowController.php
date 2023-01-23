@@ -23,6 +23,8 @@ class FollowController extends Controller {
 		$newFollow->save();
 		return	back()->with('success', 'Followed user');
 	}
-	public function unassignFollower() {
+	public function unassignFollower(User $user) {
+		Follow::where([['user_id', '=', auth()->user()->id], ['followeduser', '=', $user->id],])->delete();
+		return back()->with('success', 'Unfollowed user');
 	}
 }

@@ -29,6 +29,8 @@ Route::post('/manage-avatar', [UserController::class, "storeAvatar"])->middlewar
 
 //Profile routes
 Route::get('/profile/{user:username}', [UserController::class, "profile"]);
+Route::get('/profile/{user:username}/followers', [UserController::class, "profileFollowers"]);
+Route::get('/profile/{user:username}/following', [UserController::class, "profileFollowing"]);
 
 //Blog post routes
 Route::get('/create-post', [BlogController::class, "createPost"])->middleware('auth');

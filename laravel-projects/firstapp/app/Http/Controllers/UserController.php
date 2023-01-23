@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Follow;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\View;
 
 class UserController extends Controller {
 
@@ -52,12 +54,10 @@ class UserController extends Controller {
 		}
 	}
 	public function profile(User $user) {
+		$this->sharedProfileData($user);
 		return view(
 			'profilepage',
-			[
-				'user' => $user,
-				'posts' => $user->postsOfUser()->latest()->get(),
-			]
+			['posts' => $user->postsOfUser()->latest()->get()]
 		);
 	}
 	public function adminPage() {
@@ -86,5 +86,34 @@ class UserController extends Controller {
 			Storage::delete(str_replace("/storage", "public", $oldAvatar));
 		}
 		return redirect("profile/{$user->username}")->with('success', 'Avatar updated.');
+	}
+	public function profileFollowers(User $user) {
+		$this->sharedProfileData($user);
+		return view(
+			'profile-followers',
+			['posts' => $user->postsOfUser()->latest()->get(),]
+		);
+	}
+	public function profileFollowing(User $user) {
+		$this->sharedProfileData($user);
+		return view(
+			'profile-following',
+			['posts' => $user->postsOfUser()->latest()->get(),]
+		);
+	}
+
+	private function sharedProfileData($user) {
+		$isFollowing = 0;
+		if (auth()->check()) {
+			$isFollowing = Follow::where([
+				['user_id', '=', auth()->user()->id],
+				['followeduser', '=', $user->id]
+			],)->count();
+		}
+		View::share('sharedData', [
+			'user' => $user,
+			'isFollowing' => $isFollowing,
+			'posts' => $user->postsOfUser()->latest()->get(),
+		]);
 	}
 }
