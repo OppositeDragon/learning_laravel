@@ -476,3 +476,61 @@ Gates are a way to check if a user has a specific permission. They are not linke
 ![](imgs/unfollowed-user.png)
 
 ## Model relationships in Laravel
+1. The relationship between followers can be done in the User model class, the method would have to return the relationship.
+   ```php
+	public function followed() {
+		return $this->hasMany(Follow::class, 'followeduser');
+	}
+	public function following() {
+		return $this->hasMany(Follow::class, 'user_id');
+	}
+   ```
+1. The Follow model class, can return who followed who.
+   ```php
+	public function userFollowing() {
+		return $this->belongsTo(User::class, 'user_id');
+	}
+	public function userFollowed() {
+		return $this->belongsTo(User::class, 'followeduser');
+	}
+   ```
+1. On the user controller, this data would need to be passed down to the view, for instance:
+   ```php
+	public function profileFollowers(User $user) {
+		$this->sharedProfileData($user);
+		return view(
+			'profile-followers',
+			['followers' => $user->followed()->latest()->get(),]
+		);
+	}
+   ```
+1. On the view, on would just have to loop through the data.
+   ```php
+	@foreach ($followers as $follower)
+		followers
+			<a class="list-group-item list-group-item-action" href="/profile/{{ $follower->userFollowing->username}}">
+				<img class="avatar-tiny" src="{{$follower->userFollowing->avatar }}" />
+			{{$follower->userFollowing->username}}
+			</a>
+	@endforeach
+   ```
+## Homepage feed
+1. Creater the relationship between the user and the post, going through the follow table.
+   ```php
+	public function feedPosts() {
+		//arguments on te hasManyThrough:
+		//1 - Table on the other side of the relationship
+		//2 - Table on the middle of the relationship
+		//3 - Foreign key on the middle table
+		//4 - Foreign key on the other side of the relationship
+		//5 - Local key on the current table
+		//6 - Local key on the middle table
+		return $this->hasManyThrough(Post::class, Follow::class, 'user_id', 'user_id', 'id', 'followeduser');
+	}
+   ```
+1. Send this data, to the view.
+   ```php
+	return view('homepage-feed', ['posts' => auth()->user()->feedPosts()->latest()->get()]);
+   ```
+
+![](/imgs/feed.png)

@@ -18,9 +18,9 @@
 		</div>
 
 		<p class="text-muted small mb-4">
-			<a href="#"><img class="avatar-tiny"
-					src="{{auth()->user()->avatar}}" /></a>
-			Posted by <a href="#">{{ $post->userFromPost->username }}</a> on
+			<a href="/profile/{{ $post->userFromPost->username }}"><img class="avatar-tiny"
+					src="{{ $post->userFromPost->avatar }}" /></a>
+			Posted by <a href="/profile/{{ $post->userFromPost->username }}">{{ $post->userFromPost->username }}</a> on
 			{{ $post->created_at->format('F j, Y') }}
 		</p>
 

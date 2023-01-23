@@ -48,7 +48,7 @@ class UserController extends Controller {
 	}
 	public function showHomePage() {
 		if (auth()->check()) {
-			return view('homepage-feed');
+			return view('homepage-feed', ['posts' => auth()->user()->feedPosts()->latest()->get()]);
 		} else {
 			return view('homepage');
 		}
@@ -91,14 +91,14 @@ class UserController extends Controller {
 		$this->sharedProfileData($user);
 		return view(
 			'profile-followers',
-			['posts' => $user->postsOfUser()->latest()->get(),]
+			['followers' => $user->followed()->latest()->get(),]
 		);
 	}
 	public function profileFollowing(User $user) {
 		$this->sharedProfileData($user);
 		return view(
 			'profile-following',
-			['posts' => $user->postsOfUser()->latest()->get(),]
+			['following' => $user->following()->latest()->get(),]
 		);
 	}
 
@@ -114,6 +114,8 @@ class UserController extends Controller {
 			'user' => $user,
 			'isFollowing' => $isFollowing,
 			'posts' => $user->postsOfUser()->latest()->get(),
+			'followersCount' => $user->followed()->count(),
+			'followingCount' => $user->following()->count(),
 		]);
 	}
 }
