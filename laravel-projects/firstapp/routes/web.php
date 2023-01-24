@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\FollowController;
 
@@ -43,5 +44,9 @@ Route::get('/search/{term}', [BlogController::class, "search"]);
 
 
 //Follow user routes
-Route::post('/follow/{user}',[FollowController::class, "assignFollower"])->middleware('auth');
-Route::delete('/follow/{user}',[FollowController::class, "unassignFollower"])->middleware('auth');
+Route::post('/follow/{user}', [FollowController::class, "assignFollower"])->middleware('auth');
+Route::delete('/follow/{user}', [FollowController::class, "unassignFollower"])->middleware('auth');
+
+
+//Chat routes
+Route::post('/send-message', [ChatController::class, "sendMessage"])->middleware('auth');

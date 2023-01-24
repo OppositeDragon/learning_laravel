@@ -618,5 +618,61 @@ This is a laravel feature, but requires composer to download. Run: `composer req
    }
    ```
    This will only instantiate a Search object if the search icon is present on the page.
-	
+
 ![](imgs/search.png)
+
+## Broadcasting 
+### Events and Listeners
+- Event Listeners go on the listen method inside the `app/Providers/EventServiceProvider.php` class. For example this show code for an example event, and its listener:
+  ![](imgs/listen.png)
+  
+  Each of these should be o a different file, Laravel can help create these files, we just need to declare where on the EventServiceProvider.php file like this:
+  ![](imgs/declarations-listeners.png)
+
+  To generate these files usung Laravel run: `php artisan event:generate`
+- Now thes can be used anywhere from the aap. For example, for an event to fire when logging in, on the login method, after logging in,just add:
+  ```php
+  //...
+  event(new OurExampleEvent());
+  //...
+  ```
+- The listener can be used to do anything, for example, to send an email when the event is fired, on the handle method of the listener, add:
+  ```php
+  public function handle(OurExampleEvent $event) {
+	Log::debug('OurExampleEvent was fired');
+  }
+  ```
+
+### Pusher
+One of the default services for this on laravel is pusher. To use it [create a free account](pusher.com)
+
+Then on the `.env` file change BROADCAST_DRIVER to pusher, and pusher configuration like bellow:
+```
+BROADCAST_DRIVER=pusher
+ ---
+PUSHER_APP_ID=123456
+...
+```
+
+Then run: `composer require pusher/pusher-php-server`
+- Create a route:
+  ```php
+    Route::post('/send-message', [ChatController::class, "sendMessage"])->middleware('auth');
+  ```
+- Create a controller, and on it a function to handle the request:
+  ```php
+    public function sendMessage(Request $request) {
+		$fields = $request->validate([
+			'message' => 'required',
+		]);
+		$message = trim(strip_tags($fields['message']));
+		if (!$message) {
+			return response()->noContent();
+		}
+		broadcast(new ChatMessage(['user' => auth()->user(), 'message' => $message]))->toOthers();
+		return response()->noContent();
+	}
+  ```
+- run: `npm install laravel-echo pusher-js`
+
+- uncomment `App\Providers\BroadcastServiceProvider::class`, on `config/app.php`
