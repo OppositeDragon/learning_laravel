@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "dompurify": "^2.4.3"
+  }
+}

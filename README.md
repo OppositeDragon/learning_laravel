@@ -590,10 +590,33 @@ This is a laravel feature, but requires composer to download. Run: `composer req
 		return Post::search($term)->get();
   }
   ```
+## Vite setup for Laravel
+1. Install nodejs, run: `sudo apt install nodejs -y`
 
+2. Then to install the dependencies listed on package.json, run: `npm install`, if nnpm is not installed, run: `sudo apt install npm -y`
 
+3. Copy all the contents from `public/main.css` to `resources/css/app.css`. The main.css file can now be deleted. 
 
+4. On `resources/js/app.js` one can add the desired javascript code.
 
+5. To use the app.css and app.js files on the project, on the `layou.blade.php` file, replace the css importation line with `@vite(['resources/css/app.css'])` and add `@vite(['resources/js/app.js'])`
 
+6. To see the changes, run `npm run dev`.
 
+7. The command `npm run build` will create a production version of the app on build subdirectory.
 
+8. After copyin the `live-search.js` file to the `resources/js` import it on app.js. Run: `npm install dompurify` to install the dependency.
+
+9. On  the `app.js` file add:
+   ```javascript
+   import Search from './live-search';
+
+	//code...
+
+   if (document.querySelector('.header-search-icon')) {
+		new Search();
+   }
+   ```
+   This will only instantiate a Search object if the search icon is present on the page.
+	
+![](imgs/search.png)
