@@ -676,3 +676,34 @@ Then run: `composer require pusher/pusher-php-server`
 - run: `npm install laravel-echo pusher-js`
 
 - uncomment `App\Providers\BroadcastServiceProvider::class`, on `config/app.php`
+## Send email from Laravel
+1. Create a MailTrap account, and on the `.env` file add the following (change username and password accordingly):
+```
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USERNAME=_your-username_
+MAIL_PASSWORD=_your-password_
+MAIL_ENCRYPTION=tls
+```
+2. Create a template for the email, on `resources/views/` create a file `new-post-email.blade.php` with the following content:
+```php
+<div style="font-family: sans-serif;">
+	 <strong>{{$data['user']->username}}</strong>, {{$data['user']->username}} is a great post!.
+</div>
+```
+3. Run: `php artisan make:mail NewPostEmail`
+4. Now we can send emails, for example, on the `PostController` class, on the `store` method, add:
+```php
+Mail::to(auth()->user()->email)->send(new NewPostEmail([
+			'user' => auth()->user(),
+			'title' => $newPost->title,
+		])
+); 
+```
+5. On the build method of the `NewPostEmail` class, add:
+```php
+public function build() {
+	return $this->subject('Congratulations!')->view('new-post-email', ['data' => $this->data]);
+}
+```

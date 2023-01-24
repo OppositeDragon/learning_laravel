@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Mail\NewPostEmail;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class BlogController extends Controller {
 	public function createPost() {
@@ -21,6 +23,10 @@ class BlogController extends Controller {
 		$postFields['body'] = strip_tags($postFields['body']);
 		$postFields['user_id'] = auth()->id();
 		$newPost =	Post::create($postFields);
+		Mail::to(auth()->user()->email)->send(new NewPostEmail([
+			'user' => auth()->user(),
+			'title' => $newPost->title,
+		])); //
 		return redirect("/post/{$newPost->id}")->with('success', "New post created successfully");
 	}
 
@@ -48,6 +54,6 @@ class BlogController extends Controller {
 		$posts->load('user:id,username,avatar');
 		return $posts;
 		//return Post::where('title', 'LIKE', '%' . $term . '%')->orWhere('body', 'LIKE', '%' . $term . '%')->with('user:id,username,avatar')->get();
- 
+
 	}
 }
