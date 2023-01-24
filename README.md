@@ -532,5 +532,68 @@ Gates are a way to check if a user has a specific permission. They are not linke
    ```php
 	return view('homepage-feed', ['posts' => auth()->user()->feedPosts()->latest()->get()]);
    ```
-
 ![](/imgs/feed.png)
+
+## Pagination in laravel
+1. The pagination is done on the controller, by adding the `paginate()` method to the query. This method takes the number of items per page as an argument.
+	```php
+	return view('homepage-feed', ['posts' => auth()->user()->feedPosts()->latest()->paginate(4)]);
+	```
+1. To include links to the next and previous pages, the view needs to include `{{ $posts->links() }}`. 
+1. By default Laravel uses tailwind for css, to change this for the pagination, on `/app/Providers/AppServiceProvider.php` inside the method `boot()` add: ` Paginator::useBootstrapFive();`
+
+![](/imgs/pagination.png)
+
+## Change title of the page (on the tab)
+- Where the title is set, add the following code:
+	```php
+		<title>
+		@isset($title)
+			{{ $title }} | OurApp
+		@else
+			OurApp
+		@endisset
+	</title>
+	```
+- Then on every page that need to have a custom title, set the variable title like this:
+   ```php
+	<x-layout :title="$post->title">
+	...
+	</x-layout>
+	<!-- or -->
+	<x-profile :sharedData="$sharedData" title="{{ $sharedData['user']->username }}'s Profile" >
+	...
+	</x-profile>
+	```
+| ![](/imgs/title1.png) | ![](/imgs/title2.png) |
+| --------------------- | --------------------- |
+
+## Search in Laravel
+This is a laravel feature, but requires composer to download. Run: `composer require laravel/scout`, then to allow laraver to use this, run: `php artisan vendor:publish --provider="Laravel\Scout\ScoutServiceProvider"`. 
+
+- The Post model class will need to declare it uses Searcheable, and declare de function "toSearchArray()", whic returns an array that describes on which fields the searh will work on.
+  ```php
+  use Searchable;
+   //code..
+  public function toSearchArray() {
+		return [
+			'title' => $this->title,
+			'body' => $this->body
+		];
+	}
+  ```
+- On the `.env` file, add the following: `SCOUT_DRIVER=database`
+
+- On the BlogController, the search function needs to be implemented. 
+  ```php
+  public function search($term) {
+		return Post::search($term)->get();
+  }
+  ```
+
+
+
+
+
+
+

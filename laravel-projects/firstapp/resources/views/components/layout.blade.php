@@ -5,7 +5,13 @@
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<meta http-equiv="X-UA-Compatible" content="ie=edge" />
-	<title>OurApp</title>
+	<title>
+		@isset($title)
+			{{ $title }} | OurApp
+		@else
+			OurApp
+		@endisset
+	</title>
 	<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet"
 		integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous" />
 	<script defer src="https://use.fontawesome.com/releases/v5.5.0/js/all.js"

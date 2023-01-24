@@ -2,15 +2,23 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Laravel\Scout\Searchable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Post extends Model
-{
-    use HasFactory;
-	 protected $fillable = ['title', 'body', 'user_id'];
+class Post extends Model {
+	use Searchable;
+	use HasFactory;
+	protected $fillable = ['title', 'body', 'user_id'];
 
-	 public function userFromPost(){
-		 return $this->belongsTo(User::class, 'user_id');
-	 }
+	public function userFromPost() {
+		return $this->belongsTo(User::class, 'user_id');
+	}
+
+	public function toSearchArray() {
+		return [
+			'title' => $this->title,
+			'body' => $this->body
+		];
+	}
 }

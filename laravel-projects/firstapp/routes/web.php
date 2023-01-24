@@ -39,6 +39,7 @@ Route::post('/create-post', [BlogController::class, "storePost"])->middleware('a
 Route::delete('/post/{post}', [BlogController::class, "deletePost"])->middleware('can:delete,post');
 Route::get('/post/{post}/edit', [BlogController::class, "editPostForm"])->middleware('can:update,post');
 Route::put('/post/{post}', [BlogController::class, "updatePost"])->middleware('can:update,post');
+Route::get('/search/{term', [BlogController::class, "search"]);
 
 
 //Follow user routes

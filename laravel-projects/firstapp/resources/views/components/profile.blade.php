@@ -1,4 +1,4 @@
-<x-layout :sharedData="$sharedData" >
+<x-layout :sharedData="$sharedData" :title="$title">
 	<div class="container py-md-5 container--narrow">
 		<h2>
 			<img class="avatar-small" src="{{ $sharedData['user']->avatar }}" />

@@ -1,4 +1,4 @@
-<x-layout>
+<x-layout title="Editing: {{ $post->title }}">
     <div class="container py-md-5 container--narrow">
 		<p><strong><small><a href="/post/{{$post->id}}">&laquo; Back to post permalink</a></small></strong></p>
         <form action="/post/{{ $post->id }}" method="POST">

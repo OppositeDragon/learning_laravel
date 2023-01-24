@@ -1,4 +1,4 @@
-<x-profile :sharedData="$sharedData">
+<x-profile :sharedData="$sharedData" title="{{ $sharedData['user']->username }} follows">
 	<div class="list-group">
 		@foreach ($following as $follow)
 		following
