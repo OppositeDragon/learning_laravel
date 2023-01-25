@@ -768,3 +768,48 @@ public function handle() {
 	});
 	return view('homepage',['postCount'=>$postCount]);
 	```
+
+## API Endpoints with Laravel
+1. On the `routes/api.php` file,create routes for the login and create-post endpoints:
+   ```php
+	Route::post('/login',[UserController::class,'loginAPI' ]);
+	Route::post('/create-post',[BlogController::class,'storePostAPI' ])->middleware('auth:sanctum');
+   ```
+1. On the `UserController` class, create a function to handle the login request:
+   ```php
+	public function loginAPI(Request $request){
+		$incomingData = $request->validate([
+			'username' => ['required',],
+			'password' => ['required',],
+		]);
+		if (auth()->attempt($incomingData)) {
+			$user = User::where('username', $incomingData['username']);
+			$token = $user->createToken('authToken')->plainTextToken;
+		}
+   }
+   ```
+1. On the `BlogController` class, create a function to handle the create-post endpoint.
+   ```php
+	public function storePostAPI(Request $request) {
+		$postFields = $request->validate([
+			'title' => 'required',
+			'body' => 'required'
+		]);
+		$postFields['title'] = strip_tags($postFields['title']);
+		$postFields['body'] = strip_tags($postFields['body']);
+		$postFields['user_id'] = auth()->id();
+		$newPost =	Post::create($postFields);
+		dispatch(new SendEmailJob([
+			'user' => auth()->user(),
+			'title' => $newPost->title,
+		]));	//
+
+		return response(['message' => 'Post created successfully', 'post' => $newPost], 201);
+	}
+   ```
+1. Call the endpoint from a REST client.
+
+|1 ![](imgs/api-login.png)|2 ![](imgs/api-createpost.png)|
+|---|---|
+
+

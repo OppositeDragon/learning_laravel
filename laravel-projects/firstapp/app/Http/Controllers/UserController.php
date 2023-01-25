@@ -14,7 +14,18 @@ use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller {
-
+	public function loginAPI(Request $request) {
+		$incomingData = $request->validate([
+			'username' => ['required',],
+			'password' => ['required',],
+		]);
+		if (auth()->attempt($incomingData)) {
+			$user = User::where('username', $incomingData['username'])->first();
+			$token = $user->createToken('authToken')->plainTextToken;
+			return ['user' => $user, 'token' => $token];
+		}
+		return response(['message' => 'Invalid login credentials.'], 401);
+	}
 	public function register(Request $request) {
 		$inputData = $request->validate([
 			'username' => ['required', 'min:3', 'max:20', Rule::unique('users', 'username'),],
@@ -52,10 +63,10 @@ class UserController extends Controller {
 		if (auth()->check()) {
 			return view('homepage-feed', ['posts' => auth()->user()->feedPosts()->latest()->paginate(4)]);
 		} else {
-			$postCount=Cache::remenber('postCount', 60, function(){
+			$postCount = Cache::remenber('postCount', 60, function () {
 				return Post::count();
 			});
-			return view('homepage',['postCount'=>$postCount]);
+			return view('homepage', ['postCount' => $postCount]);
 		}
 	}
 	public function profile(User $user) {

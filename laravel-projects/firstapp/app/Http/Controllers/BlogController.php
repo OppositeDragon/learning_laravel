@@ -8,6 +8,22 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 
 class BlogController extends Controller {
+	public function storePostAPI(Request $request) {
+		$postFields = $request->validate([
+			'title' => 'required',
+			'body' => 'required'
+		]);
+		$postFields['title'] = strip_tags($postFields['title']);
+		$postFields['body'] = strip_tags($postFields['body']);
+		$postFields['user_id'] = auth()->id();
+		$newPost =	Post::create($postFields);
+		dispatch(new SendEmailJob([
+			'user' => auth()->user(),
+			'title' => $newPost->title,
+		]));	//
+
+		return response(['message' => 'Post created successfully', 'post' => $newPost], 201);
+	}
 	public function createPost() {
 
 		return view('create-post');
@@ -26,7 +42,7 @@ class BlogController extends Controller {
 			'user' => auth()->user(),
 			'title' => $newPost->title,
 		]));	//
-		
+
 		return redirect("/post/{$newPost->id}")->with('success', "New post created successfully");
 	}
 
