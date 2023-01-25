@@ -808,8 +808,139 @@ public function handle() {
 	}
    ```
 1. Call the endpoint from a REST client.
-
+ 
 |1 ![](imgs/api-login.png)|2 ![](imgs/api-createpost.png)|
 |---|---|
+
+## Docker with Laravel (for the sake of laravel)
+
+1. Install docker desktop
+   - Obtain the repository and docker official gpg keys
+   ```
+	sudo apt install -y ca-certificates curl gnupg lsb-release
+	sudo mkdir -p /etc/apt/keyrings
+	curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+	echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+	sudo apt update -y
+	```
+	- Download the [docker-desktop](https://www.docker.com/products/docker-desktop/) and install.
+   ```
+	sudo apt install -y ~/Downloads/docker-desktop-4.16.2-amd64.deb 
+	```
+   - To make sure it works run: `docker run -d -p 80:80 ubuntu:22.04`. This will download the container.
+1. From docker desktop, interact with the container, using the integrated terminal.
+     
+     ![](imgs/docker-uname.png)
+1. On the container run: `apt update`.
+1. To be able to use Laravel on the container, some packages need to be installed.
+   ```
+	apt install curl nano nginx php-cli unzip php8.1-fpm php-mysql php-mbstring php-xml php-bcmath php-curl php8.1-gd mysql-server
+	```
+
+1. Composer also needs to be installed, for this run:
+   `curl -sS https://getcomposer.org/installer -o /tmp/composer-setup.php`. Then execute the installer: `php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer`
+     ![](imgs/docker-composer.png)
+
+2. Since this in on a container, the server needs to be started manually, run: `/etc/init.d/nginx start`, same for mysql, run: `/etc/init.d/mysql start` and php: `/etc/init.d/php8.1-fpm start`.
+
+3. Visiting localhost en the host machine, nginx is displayed, the on running on the container.
+     ![](imgs/docker-nginx-localhost.png)
+
+4. The mysql database needs to be configured, run: `mysql` to enter mysql tool, then run: `ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'aoeaoe';` to set the password for the root user. Then run `exit` to exit mysql tool.
+   ![](imgs/docker-setup-mysql.png)
+5. Then, on the container run: `mysql_secure_installation` to configure the mysql server. > Use the password configured on the previous step. Next time, to enter into the mysql tool, user and password need to be provided. For instance, run: `mysql -u root -p` then type your password.
+6. Create a database and user for the laravel project. In the msql tool run:
+   ```sql
+	CREATE DATABASE laravelapp;
+	CREATE USER 'laraveluser'@'%' IDENTIFIED WITH mysql_native_password  BY 'aoeuaoeu';
+	GRANT ALL  ON laravelapp.* TO 'laraveluser'@'%';
+	```
+### Copy source code files into the docker container.
+On the host machine, run: `docker cp /home/pop/Repositories/learning_laravel/laravel-projects/firstapp festive_lalande:/var/www/laravelapp`
+> The `cp` command takes to arguments, the source, and the destination, the destination will be: name_of_container:path_to_destination. The name of the container can be obtained by running: `docker ps -a`.
+
+### Configure nginx to serve the app.
+1. On `/etc/nginx/sites-available/` replace the contents of `default with the following:
+   ```
+	server {
+		listen 80 default_server;
+		listen [::]:80 default_server;
+		root /var/www/laravelapp/public;
+
+		add_header X-Frame-Options "SAMEORIGIN";
+		add_header X-XSS-Protection "1; mode=block";
+		add_header X-Content-Type-Options "nosniff";
+		client_max_body_size 10M;
+
+		index index.html index.htm index.php;
+
+		charset utf-8;
+
+		location / {
+			try_files $uri $uri/ /index.php?$query_string;
+		}
+
+		location = /favicon.ico { access_log off; log_not_found off; }
+		location = /robots.txt  { access_log off; log_not_found off; }
+
+		error_page 404 /index.php;
+
+		location ~ \.php$ {
+			fastcgi_pass unix:/var/run/php/php8.1-fpm.sock;
+			fastcgi_index index.php;
+			fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+			include fastcgi_params;
+		}
+
+		location ~ /\.(?!well-known).* {
+			deny all;
+		}
+	}
+   ```
+- Restart nginx: `/etc/init.d/nginx restart`
+- Change permissions of the storage forder: `chown -R www-data:www-data storage`
+- Link the public directory with the storage directory by running: `php artisan storage:link`
+- Modify the `.env` file, to point to the database configured on the container.
+  ![](imgs/docker-env.png)
+- Run the migrations: `php artisan migrate`
+  > App running on docker, opened on the host machine
+![](imgs/docker-app.png)
+
+### Manage the start-up of the container.
+It would serve the purpose of running commands every time the container is started.
+1. Create a file called `startup.sh` on the root of the project, with the following content:
+	```bash
+	#!/bin/bash
+	/etc/init.d/nginx start
+	/etc/init.d/mysql start
+	/etc/init.d/php8.1-fpm start
+	/etc/init.d/cron start
+	/etc/init.d/redis-server start
+	```
+1. Allow this file to be executed: `chmod +x startup.sh`
+1. Now once the container starts, only `/startup` needs to be executed, it will take care of initializing all other services needed for laravel
+1. To allow schedules and queues to run on the container, install cron. `apt install cron`. To edit the jobs on cron, run: `crontab -e`. Add the following line towards the end of the file:
+	```
+	* * * * * /usr/bin/php /var/www/laravelapp/artisan queue:work --max-time=59
+	* * * * * /usr/bin/php /var/www/laravelapp/artisan schedule:run
+	```
+1. Now just start the cren service: `/etc/init.d/cron start`
+   
+## Redis
+1. Install redis: `apt install redis-server`
+1. On the root of the laravelapp project, run: `composer require predis/predis`, to be able to use redis on the project.
+1. Modify the `.env` file to contain these propertries and values:
+	```
+	CACHE_DRIVER=redis
+	QUEUE_CONNECTION=redis
+	REDIS_CLIENT=predis
+	```
+1. Start the redis server: `/etc/init.d/redis-server start`
+
+
+
+
+
+
 
 
