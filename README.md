@@ -759,3 +759,12 @@ public function handle() {
 	```
 
 1. To make Laravel to start the scheduler, run: `php artisan schedule:work`
+
+## Working with Cache on Laravel.
+1. Use the cache class, for example, to cache the number of posts, on the homepage, add:
+   ```php
+	$postCount=Cache::remenber('postCount', 60, function(){
+		return Post::count();
+	});
+	return view('homepage',['postCount'=>$postCount]);
+	```

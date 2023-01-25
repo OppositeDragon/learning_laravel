@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Post;
 use App\Models\User;
 use App\Models\Follow;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Cache;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\View;
 
 class UserController extends Controller {
 
@@ -50,7 +52,10 @@ class UserController extends Controller {
 		if (auth()->check()) {
 			return view('homepage-feed', ['posts' => auth()->user()->feedPosts()->latest()->paginate(4)]);
 		} else {
-			return view('homepage');
+			$postCount=Cache::remenber('postCount', 60, function(){
+				return Post::count();
+			});
+			return view('homepage',['postCount'=>$postCount]);
 		}
 	}
 	public function profile(User $user) {
