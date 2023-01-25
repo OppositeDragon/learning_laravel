@@ -707,3 +707,55 @@ public function build() {
 	return $this->subject('Congratulations!')->view('new-post-email', ['data' => $this->data]);
 }
 ```
+
+## Add Job to Queue
+1. Create a job by running: `php artisan make:job SendEmailJob`
+1. From a function, call dispatch, and a as parameter an intance or the job class, that was just created.
+```php
+dispatch(new SendEmailJob([
+	'user' => auth()->user(),
+	'title' => $newPost->title,
+]));
+```
+1. On the job class, make sure to receive the data on the constructor, and implement the body of the handle method:
+```php
+//constructor
+public $incoming;
+public function __construct($incoming) {
+	$this->incoming = $incoming;
+}
+//handle method
+public function handle() {
+	echo $this->incoming['user']->email;
+	Mail::to($this->incoming['user']->email)->send(new NewPostEmail([
+		'user' => $this->incoming['user'],
+		'title' => $this->incoming['title'],
+	]));
+}
+```
+
+1. To allow laravel to run the queue on the background, change the QUEUE_CONNECTION on the `.env` file to `database` and run: `php artisan queue:table` and `php artisan migrate`
+
+1. To start the jobs on the queaue, run: `php artisan queue:work`
+
+
+## Schedule a task
+1. Create a new template with te content to display.
+1. run `php artisan make:mail RecapMail`
+1. On the RecapMail class, add the following:
+	```php
+	public function build(){
+		$post=Post::count();
+		$user=User::count();
+		return $this->subject('Site RECAP')->view('recapmail',['postCount'=>$post,'userCount'=>$user]);
+	}
+	```
+
+1. To actually schedule a task, on the `app/Console/Kernel.php` file, inside the protected method schedule, add the following:
+	```php
+	$schedule->call(function(){
+		Mail::to('test@example.com')->send(new RecapMail());
+	})->everyMinute();
+	```
+
+1. To make Laravel to start the scheduler, run: `php artisan schedule:work`

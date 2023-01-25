@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\SendEmailJob;
 use App\Models\Post;
-use App\Mail\NewPostEmail;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
 
 class BlogController extends Controller {
 	public function createPost() {
@@ -23,10 +22,11 @@ class BlogController extends Controller {
 		$postFields['body'] = strip_tags($postFields['body']);
 		$postFields['user_id'] = auth()->id();
 		$newPost =	Post::create($postFields);
-		Mail::to(auth()->user()->email)->send(new NewPostEmail([
+		dispatch(new SendEmailJob([
 			'user' => auth()->user(),
 			'title' => $newPost->title,
-		])); //
+		]));	//
+		
 		return redirect("/post/{$newPost->id}")->with('success', "New post created successfully");
 	}
 
