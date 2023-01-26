@@ -809,8 +809,8 @@ public function handle() {
    ```
 1. Call the endpoint from a REST client.
  
-|1 ![](imgs/api-login.png)|2 ![](imgs/api-createpost.png)|
-|---|---|
+| 1 ![](imgs/api-login.png) | 2 ![](imgs/api-createpost.png) |
+| ------------------------- | ------------------------------ |
 
 ## Docker with Laravel (for the sake of laravel)
 
@@ -937,10 +937,36 @@ It would serve the purpose of running commands every time the container is start
 	```
 1. Start the redis server: `/etc/init.d/redis-server start`
 
+## Deploy on VPS
+Create a VPS, with a provider like Digital Ocean or Linode.
 
+![](imgs/do-dashboard.png)
 
+![](imgs/do-sshlogin.png)
 
+Install nginx, and other needed packages:
+```
+sudo apt update
 
+sudo apt install mysql-server mysql-client
+sudo apt install nginx 
+sudo apt install php-cli unzip php8.1-fpm php-mysql php-mbstring php-xml php-bcmath php-curl php8.1-gd 
+```
+Install composer:
+```
+curl -sS https://getcomposer.org/installer -o /tmp/composer-setup.php
+php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer
+```
+Access the server from the web browser
+![](imgs/do-nginx.png)
 
+Alter root user of mysql, run: `mysql` then: `ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'aoeuaoeu';`
+Then run: `mysql_secure_installation` and follow the instructions.
+Launch the mysql tool: `mysql -u root -p` and create the database and user for the laravel app:
+```sql
+CREATE DATABASE laravelapp;
+CREATE USER 'laraveluser'@'%' IDENTIFIED WITH mysql_native_password  BY 'aoeuaoeu';
+GRANT ALL ON laravelapp.* TO 'laraveluser'@'%';
+```
 
-
+## [Udemy Certificate](https://ude.my/UC-8f1e8a9f-241f-43b1-b234-f88754c438da)
