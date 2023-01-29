@@ -969,4 +969,6 @@ CREATE USER 'laraveluser'@'%' IDENTIFIED WITH mysql_native_password  BY 'aoeuaoe
 GRANT ALL ON laravelapp.* TO 'laraveluser'@'%';
 ```
 
-## [Udemy Certificate](https://ude.my/UC-8f1e8a9f-241f-43b1-b234-f88754c438da)
+### App deployed on VPS
+![](imgs/app-deployed.png)
+##  [Udemy Certificate ![](https://udemy-certificate.s3.amazonaws.com/image/UC-8f1e8a9f-241f-43b1-b234-f88754c438da.jpg?v=1674701666000)](https://ude.my/UC-8f1e8a9f-241f-43b1-b234-f88754c438da)
